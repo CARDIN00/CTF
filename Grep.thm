@@ -1,0 +1,81 @@
+# NMAP
+22/tcp  open  ssh      OpenSSH 8.2p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 91:b0:11:79:f5:d7:4f:d9:22:64:a9:be:18:80:05:e6 (RSA)
+|   256 79:30:ee:e3:aa:5f:d9:0e:eb:06:1f:dc:94:ba:66:64 (ECDSA)
+|_  256 5d:59:ff:0d:73:b2:71:33:29:16:73:ca:49:23:8b:2d (ED25519)
+80/tcp  open  http     Apache httpd 2.4.41 ((Ubuntu))
+|_http-title: Apache2 Ubuntu Default Page: It works
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+443/tcp open  ssl/http Apache httpd 2.4.41
+| tls-alpn: 
+|_  http/1.1
+| http-title: Welcome
+|_Requested resource was /public/html/
+|_ssl-date: TLS randomness does not represent time
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+| http-cookie-flags: 
+|   /: 
+|     PHPSESSID: 
+|_      httponly flag not set
+| ssl-cert: Subject: commonName=grep.thm/organizationName=SearchME/stateOrProvinceName=Some-State/countryName=US
+| Not valid before: 2023-06-14T13:03:09
+|_Not valid after:  2024-06-13T13:03:09
+
+
+# FINDS:
+You should replace this file (located at /var/www/html/index.html) before continuing to operate your HTTP server. 
+
+/etc/apache2/
+|-- apache2.conf
+|       `--  ports.conf
+|-- mods-enabled
+|       |-- *.load
+|       `-- *.conf
+|-- conf-enabled
+|       `-- *.conf
+|-- sites-enabled
+|       `-- *.conf
+
+By default, Ubuntu does not allow access through the web browser to any file apart of those located in /var/www, public_html directories (when enabled) and /usr/share (for web applications). If your site is using a web document root located elsewhere (such as in /srv) you may need to whitelist your document root directory in /etc/apache2/apache2.conf.
+
+:::
+We tried to access the webpage at port 443:
+we got permission denied:
+We entered the https://grep.thm into the /etc/hosts as well
+and we gon into the website:
+
+
+WE GOT THE API AT THE GITHUB REPOSITORY:
+We found the API key there:
+we logged in:
+
+2: Other directory we found is the Uploads directory:
+in the code present in the github directory:
+we found:
+$allowedExtensions = ['jpg', 'jpeg', 'png', 'bmp'];
+$validMagicBytes = [
+    'jpg' => 'ffd8ffe0', 
+    'png' => '89504e47', 
+    'bmp' => '424d'
+];
+
+we need to change the first magic bytes to one of the above: as the only thing being checked is the magic bytes:
+:: We will use the hex editor for that:
+sudo hexeditor php-revshell.phg.php
+We will change the first 8 hex bits to the ones we have above:
+
+And the file is uploaded successfully:
+
+We will go to the /uploads directory and start our netcat listener on our computer : 
+and when the file is clicked in the directory , our reverse shell works fine:
+
+
+Reverse shell work:
+1: Stabalise the shell:
+
+In the /var/www/backup::
+
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `name`, `role`) VALUES
+(1, 'test', '$2y$10$dE6VAdZJCN4repNAFdsO2ePDr3StRdOhUJ1O/41XVQg91qBEBQU3G', 'test@grep.thm', 'Test User', 'user'),
+(2, 'admin', '$2y$10$3V62f66VxzdTzqXF4WHJI.Mpgcaj3WxwYsh7YDPyv1xIPss4qCT9C', 'admin@searchme2023cms.grep.thm', 'Admin User', 'admin');
