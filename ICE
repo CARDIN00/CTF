@@ -137,3 +137,4 @@ Kiwi Commands
     wifi_list_shared          List shared wifi profiles/creds (requires SYSTEM)
 
 HASHDUMP :: allows us to dump all the password hashes stored on the system:
+It was a good start time ctf for learning process.
