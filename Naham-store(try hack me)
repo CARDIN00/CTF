@@ -1,0 +1,85 @@
+# Nmap:
+kali@kali:~/Downloads$ nmap -T4 -O -A 10.10.114.174
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-08 12:03 IST
+Nmap scan report for www.nahamstore.thm (10.10.114.174)
+Host is up (0.21s latency).
+Not shown: 997 closed tcp ports (reset)
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 84:6e:52:ca:db:9e:df:0a:ae:b5:70:3d:07:d6:91:78 (RSA)
+|   256 1a:1d:db:ca:99:8a:64:b1:8b:10:df:a9:39:d5:5c:d3 (ECDSA)
+|_  256 f6:36:16:b7:66:8e:7b:35:09:07:cb:90:c9:84:63:38 (ED25519)
+80/tcp   open  http    nginx 1.14.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://nahamstore.thm
+|_http-server-header: nginx/1.14.0 (Ubuntu)
+8000/tcp open  http    nginx 1.18.0 (Ubuntu)
+|_http-open-proxy: Proxy might be redirecting requests
+|_http-title: Site doesn't have a title (text/html; charset=UTF-8).
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+| http-robots.txt: 1 disallowed entry 
+|_/admin
+
+
+# Subdomain Recon:
+
+# Directory Recon:
+/search               (Status: 200) [Size: 3351]
+/login                (Status: 200) [Size: 3099]
+/register             (Status: 200) [Size: 3138]
+/uploads              (Status: 301) [Size: 178] [--> http://127.0.0.1/uploads/]
+/staff                (Status: 200) [Size: 2287]
+/css                  (Status: 301) [Size: 178] [--> http://127.0.0.1/css/]
+/js                   (Status: 301) [Size: 178] [--> http://127.0.0.1/js/]
+/logout               (Status: 302) [Size: 0] [--> /]
+/basket               (Status: 200) [Size: 2465]
+/robots.txt           (Status: 200) [Size: 13]
+/returns              (Status: 200) [Size: 3628]
+
+::
+http://nahamstore.thm:8000/admin/login
+
+# Fuzzing:
+We got three main parameters:
+www.nahamstore.thm
+shop.nahamstore.thm
+marketing.nahamstore.thm
+stock.nahamstore.thm
+
+# FINDS:
+http://nahamstore.thm:8000/admin/login
+http://nahamstore.thm/basket
+http://nahamstore.thm/
+http://nahamstore.thm/staff  (can be file inclusion)
+http://marketing.nahamstore.thm/
+http://marketing.nahamstore.thm/8d1952ba2b3c6dcd76236f090ab8642c
+
+http://nahamstore.thm:8000/robots.txt
+User-agent: *
+Disallow: /admin
+
+
+# Question 1 : Recon 
+Using a combination of subdomain enumeration, brute force, content discovery and fuzzing find all the subdomains you can and answer the below questions.
+
+# IDOR
+http://nahamstore.thm.basket
+the  address_id is vulnerable to the IDOR vulnerability
+Mr Jimmy Jones 
+160 Broadway
+New York
+10038    
+
+# RCE
+
+cat /etc/hosts
+
+172.17.0.6      2431fe29a4b0
+127.0.0.1       nahamstore.thm
+127.0.0.1       www.nahamstore.thm
+172.17.0.1      stock.nahamstore.thm
+172.17.0.1      marketing.nahamstore.thm
+172.17.0.1      shop.nahamstore.thm
+172.17.0.1      nahamstore-2020.nahamstore.thm
+172.17.0.1      nahamstore-2020-dev.nahamstore.thm
+10.131.104.72   internal-api.nahamstore.thm
