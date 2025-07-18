@@ -1,0 +1,266 @@
+# Nmap:
+PORTS: 
+22 , 80
+
+# Gobuster:
+
+/Wordpress:
+
+# WP Scan:
+kali@kali:~/Downloads$ wpscan --url http://mountaineer.thm/wordpress/ -eap --api-token QFAOA6JlZjwfsjJsXWGAIz9FjMooSdIKRWUUXVdSeGE
+_______________________________________________________________
+         __          _______   _____
+         \ \        / /  __ \ / ____|
+          \ \  /\  / /| |__) | (___   ___  __ _ _ __ ®
+           \ \/  \/ / |  ___/ \___ \ / __|/ _` | '_ \
+            \  /\  /  | |     ____) | (__| (_| | | | |
+             \/  \/   |_|    |_____/ \___|\__,_|_| |_|
+
+         WordPress Security Scanner by the WPScan Team
+                         Version 3.8.28
+       Sponsored by Automattic - https://automattic.com/
+       @_WPScan_, @ethicalhack3r, @erwan_lr, @firefart
+_______________________________________________________________
+
+[+] URL: http://mountaineer.thm/wordpress/ [10.10.26.49]
+[+] Started: Tue Jun  3 14:34:52 2025
+
+Interesting Finding(s):
+
+[+] Headers
+ | Interesting Entry: Server: nginx/1.18.0 (Ubuntu)
+ | Found By: Headers (Passive Detection)
+ | Confidence: 100%
+
+[+] XML-RPC seems to be enabled: http://mountaineer.thm/wordpress/xmlrpc.php
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+ | References:
+ |  - http://codex.wordpress.org/XML-RPC_Pingback_API
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_ghost_scanner/
+ |  - https://www.rapid7.com/db/modules/auxiliary/dos/http/wordpress_xmlrpc_dos/
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_xmlrpc_login/
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_pingback_access/
+
+[+] WordPress readme found: http://mountaineer.thm/wordpress/readme.html
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+
+[+] The external WP-Cron seems to be enabled: http://mountaineer.thm/wordpress/wp-cron.php
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 60%
+ | References:
+ |  - https://www.iplocation.net/defend-wordpress-from-ddos
+ |  - https://github.com/wpscanteam/wpscan/issues/1299
+
+[+] WordPress version 6.4.3 identified (Insecure, released on 2024-01-30).
+ | Found By: Rss Generator (Passive Detection)
+ |  - http://mountaineer.thm/wordpress/?feed=rss2, <generator>https://wordpress.org/?v=6.4.3</generator>
+ |  - http://mountaineer.thm/wordpress/?feed=comments-rss2, <generator>https://wordpress.org/?v=6.4.3</generator>
+ |
+ | [!] 4 vulnerabilities identified:
+ |
+ | [!] Title: WP < 6.5.2 - Unauthenticated Stored XSS
+ |     Fixed in: 6.4.4
+ |     References:
+ |      - https://wpscan.com/vulnerability/1a5c5df1-57ee-4190-a336-b0266962078f
+ |      - https://wordpress.org/news/2024/04/wordpress-6-5-2-maintenance-and-security-release/
+ |
+ | [!] Title: WordPress < 6.5.5 - Contributor+ Stored XSS in HTML API
+ |     Fixed in: 6.4.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/2c63f136-4c1f-4093-9a8c-5e51f19eae28
+ |      - https://wordpress.org/news/2024/06/wordpress-6-5-5/
+ |
+ | [!] Title: WordPress < 6.5.5 - Contributor+ Stored XSS in Template-Part Block
+ |     Fixed in: 6.4.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/7c448f6d-4531-4757-bff0-be9e3220bbbb
+ |      - https://wordpress.org/news/2024/06/wordpress-6-5-5/
+ |
+ | [!] Title: WordPress < 6.5.5 - Contributor+ Path Traversal in Template-Part Block
+ |     Fixed in: 6.4.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/36232787-754a-4234-83d6-6ded5e80251c
+ |      - https://wordpress.org/news/2024/06/wordpress-6-5-5/
+
+[+] WordPress theme in use: blogarise
+ | Location: http://mountaineer.thm/wordpress/wp-content/themes/blogarise/
+ | Last Updated: 2025-05-26T00:00:00.000Z
+ | Readme: http://mountaineer.thm/wordpress/wp-content/themes/blogarise/readme.txt
+ | [!] The version is out of date, the latest version is 1.1.7
+ | Style URL: http://mountaineer.thm/wordpress/wp-content/themes/blogarise/style.css?ver=6.4.3
+ | Style Name: BlogArise
+ | Style URI: https://themeansar.com/free-themes/blogarise/
+ | Description: BlogArise is a fast, clean, modern-looking Best Responsive News Magazine WordPress theme. The theme ...
+ | Author: Themeansar
+ | Author URI: http://themeansar.com
+ |
+ | Found By: Css Style In Homepage (Passive Detection)
+ |
+ | Version: 0.55 (80% confidence)
+ | Found By: Style (Passive Detection)
+ |  - http://mountaineer.thm/wordpress/wp-content/themes/blogarise/style.css?ver=6.4.3, Match: 'Version: 0.55'
+
+[+] Enumerating All Plugins (via Passive Methods)
+[+] Checking Plugin Versions (via Passive and Aggressive Methods)
+
+[i] Plugin(s) Identified:
+
+[+] modern-events-calendar-lite
+ | Location: http://mountaineer.thm/wordpress/wp-content/plugins/modern-events-calendar-lite/
+ | Last Updated: 2022-05-10T21:06:00.000Z
+ | [!] The version is out of date, the latest version is 6.5.6
+ |
+ | Found By: Urls In Homepage (Passive Detection)
+ |
+ | [!] 17 vulnerabilities identified:
+ |
+ | [!] Title: Modern Events Calendar Lite < 5.16.5 - Authenticated Stored Cross-Site Scripting (XSS)
+ |     Fixed in: 5.16.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/0f9ba284-5d7e-4092-8344-c68316b0146f
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24147
+ |
+ | [!] Title: Modern Events Calendar Lite < 5.16.5 - Unauthenticated Events Export
+ |     Fixed in: 5.16.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/c7b1ebd6-3050-4725-9c87-0ea525f8fecc
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24146
+ |
+ | [!] Title: Modern Events Calendar Lite < 5.16.5 - Authenticated Arbitrary File Upload leading to RCE
+ |     Fixed in: 5.16.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/f42cc26b-9aab-4824-8168-b5b8571d1610
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24145
+ |
+ | [!] Title: Modern Events Calendar Lite < 5.16.6 - Authenticated SQL Injection
+ |     Fixed in: 5.16.6
+ |     References:
+ |      - https://wpscan.com/vulnerability/26819680-22a8-4348-b63d-dc52c0d50ed0
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24149
+ |
+ | [!] Title: Modern Events Calendar Lite < 5.22.2 - Admin+ Stored Cross-Site Scripting
+ |     Fixed in: 5.22.2
+ |     References:
+ |      - https://wpscan.com/vulnerability/300ba418-63ed-4c03-9031-263742ed522e
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24687
+ |
+ | [!] Title: Modern Events Calendar Lite < 5.22.3 - Authenticated Stored Cross Site Scripting
+ |     Fixed in: 5.22.3
+ |     References:
+ |      - https://wpscan.com/vulnerability/576cc93d-1499-452b-97dd-80f69002e2a0
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24716
+ |
+ | [!] Title: Modern Events Calendar < 6.1.5 - Unauthenticated Blind SQL Injection
+ |     Fixed in: 6.1.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/09871847-1d6a-4dfe-8a8c-f2f53ff87445
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24946
+ |
+ | [!] Title: Modern Events Calendar Lite < 6.1.5 - Reflected Cross-Site Scripting
+ |     Fixed in: 6.1.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/82233588-6033-462d-b886-a8ef5ee9adb0
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24925
+ |
+ | [!] Title: Modern Events Calendar Lite < 6.2.0 - Subscriber+ Category Add Leading to Stored XSS
+ |     Fixed in: 6.2.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/19c2f456-a41e-4755-912d-13683719bae6
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-25046
+ |
+ | [!] Title: Modern Events Calendar Lite < 6.4.0 - Contributor+ Stored Cross Site Scripting
+ |     Fixed in: 6.4.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/0eb40cd5-838e-4b53-994d-22cf7c8a6c50
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-0364
+ |
+ | [!] Title: Modern Events Calendar Lite < 6.5.2 - Admin+ Stored Cross-Site Scripting
+ |     Fixed in: 6.5.2
+ |     References:
+ |      - https://wpscan.com/vulnerability/ef2843d0-f84d-4093-a08b-342ed0848914
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-27848
+ |
+ | [!] Title: Modern Events Calendar Lite < 6.3.0 - Authenticated Stored Cross-Site Scripting
+ |     Fixed in: 6.3.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/a614adad-6b3c-4566-b615-9dfcbdbed514
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-30533
+ |      - https://jvn.jp/en/jp/JVN04155116/
+ |
+ | [!] Title: Modern Events Calendar Lite < 6.4.7 - Reflected Cross-Site Scripting
+ |     Fixed in: 6.4.7
+ |     Reference: https://wpscan.com/vulnerability/4ecf4232-0a0f-4d20-981d-fd0f697d96a9
+ |
+ | [!] Title: Modern Events Calendar lite < 6.5.2 - Admin+ Stored XSS
+ |     Fixed in: 6.5.2
+ |     References:
+ |      - https://wpscan.com/vulnerability/c7feceef-28f1-4cac-b124-4b95e3f17b07
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-1400
+ |
+ | [!] Title: Modern Events Calendar lite < 7.1.0 - Authenticated (Admin+) Stored Cross-Site Scripting
+ |     Fixed in: 7.1.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/0b4286db-6c6f-4426-9506-314bf78e4905
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-4021
+ |      - https://www.wordfence.com/threat-intel/vulnerabilities/id/f213fb42-5bab-4017-80ea-ce6543031af2
+ |
+ | [!] Title: Modern Events Calendar <= 7.11.0 - Authenticated (Subscriber+) Arbitrary File Upload
+ |     Fixed in: 7.12.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/2e33db28-12b1-43ea-845c-0f71e33ab8ae
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-5441
+ |      - https://www.wordfence.com/threat-intel/vulnerabilities/id/0c007090-9d9b-4ee7-8f77-91abd4373051
+ |
+ | [!] Title: Modern Events Calendar <= 7.12.1 - Subscriber+ Server Side Request Forgery
+ |     Fixed in: 7.13.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/f43e294c-4fc2-4d9c-82b3-6551690f1b82
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-6522
+ |      - https://www.wordfence.com/threat-intel/vulnerabilities/id/00bf8f2f-6ab4-4430-800b-5b97abe7589e
+ |
+ | Version: 5.16.2 (100% confidence)
+ | Found By: Readme - Stable Tag (Aggressive Detection)
+ |  - http://mountaineer.thm/wordpress/wp-content/plugins/modern-events-calendar-lite/readme.txt
+ | Confirmed By: Change Log (Aggressive Detection)
+ |  - http://mountaineer.thm/wordpress/wp-content/plugins/modern-events-calendar-lite/changelog.txt, Match: '5.16.2'
+
+
+We have found :  http://mountaineer.thm/wordpress/wp-content/plugins/modern-events-calendar-lite/
+
+1: Title: Modern Events Calendar <= 7.11.0 - Authenticated (Subscriber+) Arbitrary File Upload
+ |     Fixed in: 7.12.0
+ |     References:
+ |      - https://wpscan.com/vulnerability/2e33db28-12b1-43ea-845c-0f71e33ab8ae
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-5441
+ |      - https://www.wordfence.com/threat-intel/vulnerabilities/id/0c007090-9d9b-4ee7-8f77-91abd4373051
+
+ 2: [!] Title: Modern Events Calendar < 6.1.5 - Unauthenticated Blind SQL Injection
+ |     Fixed in: 6.1.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/09871847-1d6a-4dfe-8a8c-f2f53ff87445
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24946
+
+3: !] Title: Modern Events Calendar Lite < 5.16.6 - Authenticated SQL Injection
+ |     Fixed in: 5.16.6
+ |     References:
+ |      - https://wpscan.com/vulnerability/26819680-22a8-4348-b63d-dc52c0d50ed0
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24149
+
+4: [!] Title: Modern Events Calendar Lite < 5.16.5 - Authenticated Arbitrary File Upload leading to RCE
+ |     Fixed in: 5.16.5
+ |     References:
+ |      - https://wpscan.com/vulnerability/f42cc26b-9aab-4824-8168-b5b8571d1610
+ |      - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-24145
+
+PASSWORDS:
+
+username :: mblanc
+password:: GOqNCpo6o38U7JX3PTp0
+
+Michael321
+12345
+
+kangchenjunga
+J9f4z7tQlqsPhbf2nlaekD5vzn4yBfpdwUdawmtV
