@@ -1,0 +1,100 @@
+# N-map
+kali@kali:~/Downloads$ nmap -T4 -O -A 10.10.203.50
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-22 15:07 IST
+Nmap scan report for 10.10.203.50
+Host is up (0.29s latency).
+Not shown: 997 filtered tcp ports (no-response)
+PORT    STATE  SERVICE  VERSION
+22/tcp  closed ssh
+80/tcp  open   http     Apache httpd
+|_http-title: Site doesn't have a title (text/html).
+|_http-server-header: Apache
+443/tcp open   ssl/http Apache httpd
+|_http-title: Site doesn't have a title (text/html).
+|_http-server-header: Apache
+| ssl-cert: Subject: commonName=www.example.com
+| Not valid before: 2015-09-16T10:45:03
+|_Not valid after:  2025-09-13T10:45:03
+
+
+# Gobuster:
+/.html                (Status: 403) [Size: 214]
+/index.php            (Status: 301) [Size: 0] [--> http://10.10.203.50/]
+/index.html           (Status: 200) [Size: 1188]
+/images               (Status: 301) [Size: 235] [--> http://10.10.203.50/images/]
+/blog                 (Status: 301) [Size: 233] [--> http://10.10.203.50/blog/]
+/rss                  (Status: 301) [Size: 0] [--> http://10.10.203.50/feed/]
+/sitemap              (Status: 200) [Size: 0]
+/sitemap.xml          (Status: 200) [Size: 0]
+/login                (Status: 302) [Size: 0] [--> http://10.10.203.50/wp-login.php]
+/0                    (Status: 301) [Size: 0] [--> http://10.10.203.50/0/]
+/feed                 (Status: 301) [Size: 0] [--> http://10.10.203.50/feed/]
+/video                (Status: 301) [Size: 234] [--> http://10.10.203.50/video/]
+/image                (Status: 301) [Size: 0] [--> http://10.10.203.50/image/]
+/atom                 (Status: 301) [Size: 0] [--> http://10.10.203.50/feed/atom/]
+/wp-content           (Status: 301) [Size: 239] [--> http://10.10.203.50/wp-content/]
+/admin                  (Status: 301) [Size: 234] [--> http://10.10.203.50/admin/]
+audio                (Status: 301) [Size: 234] [--> http://10.10.203.50/audio/]
+/intro                (Status: 200) [Size: 516314]
+/wp-login             (Status: 200) [Size: 2664]
+/wp-login.php         (Status: 200) [Size: 2664]
+/css                  (Status: 301) [Size: 232] [--> http://10.10.203.50/css/]
+/rss2                 (Status: 301) [Size: 0] [--> http://10.10.203.50/feed/]
+
+
+ROBOTS.TXT
+User-agent: *
+fsocity.dic
+key-1-of-3.txt
+
+
+FINDS:
+In the license directory we find a base 64 encoded string:
+ZWxsaW90OkVSMjgtMDY1Mgo=
+Decode::
+elliot:ER28-0652
+
+
+We enter the credentials in hte Wp-loigin page 
+
+kgordon@therapist.com
+(KQvom@koiebZZ0!SwrX!M&F
+
+We will use the editor option adn load the reverse shell into the file and update it.
+and them we will go to the :
+start the netcat listener in the shell.
+http://10.10.203.50/wp-content/themes/twentyfifteen/archive
+
+We have our reverse shell.
+
+KEY 1:
+find / -name key-1-of-3.txt 2>/dev/null
+
+cat key:
+073403c8a58a1f80d943455fb30724b9
+
+::
+daemon@linux:/home/robot$ cat password.raw-md5
+cat password.raw-md5
+robot : c3fcd3d76192e4007dfb496cca67e13b
+
+
+After decoding the hash using the john the ripper:
+abcdefghijklmnopqrstuvwxyz 
+
+
+::::
+Root escalation:
+Even thouh we can inport the linpeas.sh, we cant seem to be able to run the script , as we are loosing out reverse shell:
+
+We have nmap in suid 
+we can use it to elivate our priveleges.
+and we have the root key.(final key)
+
+
+PRIVATE_KEY=$(curl -s ${API_URL}/challenge | jq -r ".player_wallet.private_key")
+CONTRACT_ADDRESS=$(curl -s ${API_URL}/challenge | jq -r ".contract_address")
+ PLAYER_ADDRESS=$(curl -s ${API_URL}/challenge | jq -r ".player_wallet.address")
+is_solved=`cast call $CONTRACT_ADDRESS "isSolved()(bool)" --rpc-url ${RPC_URL}`
+ echo "Check if is solved: $is_solved"
+
