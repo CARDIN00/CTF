@@ -1,0 +1,51 @@
+hidden public key:
+
+00d7e514c36e077d867cd0ece3caf019cbff30055f3cb9a6f7c87141feb22bbf46e77b23f734d8e87739404b958ea397c37349c8d3e4a9dbd273480e37ee7cec706ffbe31138c218c3b7e86c8eea5f31e81b9d8318fa53cf96f3cd044c1c2bf6994166a6b7af5a73a9ea17091000acc81a11e2d2b94f2f4d7f3454f3624c94bced
+
+NMAP 
+kali@kali:~/Downloads/TryHackMe/Brains$ nmap -T4 -O -A 10.10.72.32
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-04-19 18:54 IST
+Stats: 0:00:03 elapsed; 0 hosts completed (1 up), 1 undergoing SYN Stealth Scan
+SYN Stealth Scan Timing: About 7.00% done; ETC: 18:55 (0:00:27 remaining)
+Nmap scan report for brain.thm (10.10.72.32)
+Host is up (0.22s latency).
+Not shown: 997 closed tcp ports (reset)
+PORT      STATE SERVICE VERSION
+22/tcp    open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.11 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 45:ba:0e:88:07:d9:f4:69:34:f9:82:fb:d5:97:cb:1e (RSA)
+|   256 b8:d1:08:64:e3:d5:13:da:71:4c:c5:25:f8:5d:e2:0b (ECDSA)
+|_  256 ca:9c:02:71:9a:b3:d0:a7:e3:b4:9d:db:f4:a7:69:95 (ED25519)
+80/tcp    open  http    Apache httpd 2.4.41 ((Ubuntu))
+|_http-title: Maintenance
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+50000/tcp open  http    Apache Tomcat (language: en)
+| http-title: Log in to TeamCity &mdash; TeamCity
+|_Requested resource was /login.html
+No exact OS matches for host (If you know what OS is running on it, see https://nmap.org/s
+TCP/IP fingerprint:
+OS:SCAN(V=7.95%E=4%D=4/19%OT=22%CT=1%CU=33400%PV=Y%DS=2%DC=T%G=Y%TM=6803A45
+OS:0%P=x86_64-pc-linux-gnu)SEQ(SP=102%GCD=1%ISR=105%TI=Z%CI=Z%TS=A)SEQ(SP=1
+OS:04%GCD=1%ISR=109%TI=Z%CI=Z%II=I%TS=A)SEQ(SP=104%GCD=1%ISR=10C%TI=Z%CI=Z%
+OS:II=I%TS=A)SEQ(SP=106%GCD=1%ISR=108%TI=Z%CI=Z%II=I%TS=A)SEQ(SP=106%GCD=1%
+OS:ISR=10D%TI=Z%CI=Z%II=I%TS=A)OPS(O1=M4E2ST11NW7%O2=M4E2ST11NW7%O3=M4E2NNT
+OS:11NW7%O4=M4E2ST11NW7%O5=M4E2ST11NW7%O6=M4E2ST11)WIN(W1=F4B3%W2=F4B3%W3=F
+OS:4B3%W4=F4B3%W5=F4B3%W6=F4B3)ECN(R=Y%DF=Y%T=40%W=F507%O=M4E2NNSNW7%CC=Y%Q
+OS:=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=Y%T=40%
+OS:W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=Y%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=
+OS:)T6(R=Y%DF=Y%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y%DF=Y%T=40%W=0%S=Z%A=
+OS:S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=164%UN=0%RIPL=G%RID=G%RIPCK=G%RU
+OS:CK=G%RUD=G)IE(R=Y%DFI=N%T=40%CD=S)
+
+Network Distance: 2 hops
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+                                                         
+TRACEROUTE (using port 111/tcp)                          
+HOP RTT       ADDRESS                                    
+1   262.44 ms 10.21.0.1                                  
+2   262.50 ms brain.thm (10.10.72.32)  
+
+we go to PORT 50000
+we find out the Teamcity version has a vuilnerability
+we achive the remote code exicution
+we get the flag at /home/ubuntu/flag.txt
